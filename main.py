@@ -10,28 +10,60 @@ from notify.notifier import Notifier
 import time
 
 
+
+def display_and_select(results):
+    if not results:
+        print("No results found.")
+        return None
+    letters = 'abcdefghijklmnopqrstuvwxyz'
+    for idx, item in enumerate(results):
+        label = letters[idx % len(letters)]
+        print(f"[{label}] {item['title']}")
+    choice = input("Select a result by letter: ").strip().lower()
+    if choice in letters[:len(results)]:
+        return results[letters.index(choice)]
+    print("Invalid selection.")
+    return None
+
 def main():
     config = load_config()
     nzbgeek = NZBGeekClient(config['nzbgeek'])
     sab = SABnzbdClient(config['sabnzbd'])
-  #  jellyfin = JellyfinClient(config['jellyfin'])
+    # jellyfin = JellyfinClient(config['jellyfin'])
     scene_parser = SceneNameParser()
     filter_engine = FilterEngine(config['filters'], scene_parser)
     post_processor = PostProcessor(config['postprocess'])
     notifier = Notifier(config['notify'])
 
-    # Example workflow loop
     while True:
-        for search in config['searches']:
+        search = prompt_for_search()
+        if not search:
+            print("No search entered. Exiting.")
+            break
+        results = nzbgeek.search(search)
+        selected = display_and_select(results)
+        if selected and not sab.is_already_queued(selected):
+            sab.add_nzb(selected)
+            notifier.notify(f"Added NZB: {selected['title']}")
+        again = input("Search for another title? (y/n): ").strip().lower()
+        if again != 'y':
+            break
+    def prompt_for_search():
+        return input("Enter the title of the movie/TV show to search for: ").strip()
+
+        while True:
+            search = prompt_for_search()
+            if not search:
+                print("No search entered. Exiting.")
+                break
             results = nzbgeek.search(search)
-            filtered = filter_engine.apply(results)
-            for nzb in filtered:
-                if not sab.is_already_queued(nzb):
-                    sab.add_nzb(nzb)
-                    notifier.notify(f"Added NZB: {nzb['title']}")
-        sab.monitor_downloads(post_processor, notifier)
-#        jellyfin.refresh_library()
-        time.sleep(config.get('interval', 3600))
+            selected = display_and_select(results)
+            if selected and not sab.is_already_queued(selected):
+                sab.add_nzb(selected)
+                notifier.notify(f"Added NZB: {selected['title']}")
+            again = input("Search for another title? (y/n): ").strip().lower()
+            if again != 'y':
+                break
 
 if __name__ == "__main__":
     main()

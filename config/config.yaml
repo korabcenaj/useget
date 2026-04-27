@@ -20,5 +20,5 @@ notify:
   email: null
   discord_webhook: null
 searches:
-  - "Solaris"
+  - "Solaris 1972"
 interval: 3600
