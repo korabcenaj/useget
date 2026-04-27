@@ -17,24 +17,51 @@ def display_and_select(results):
         return None
     letters = 'abcdefghijklmnopqrstuvwxyz'
     # Step 1: Filter out 4k (2160p) results
-    allowed_qualities = {'1080p', '720p'}
     filtered_results = []
     import re
     # Ask user if searching for movie or TV show
     media_type = ''
     while media_type not in ['movie', 'tv']:
         media_type = input("Is this a movie or tv show? (movie/tv): ").strip().lower()
+    # Ask user for the original search text
+    search_text = input("Enter the exact title (or leave blank to use previous search): ").strip()
+    if not search_text:
+        search_text = None
+    import difflib
     for item in results:
-        match = re.search(r'(\d{3,4}p)', item['title'])
-        quality = match.group(1) if match else ''
-        if quality not in allowed_qualities:
-            continue
+        # No quality filter: include all
         # Movie: look for year pattern, TV: look for SxxExx pattern
         if media_type == 'movie':
             if not re.search(r'\.(19|20)\d{2}\.', item['title']):
                 continue
         elif media_type == 'tv':
             if not re.search(r'\.S\d{2}E\d{2}\.', item['title'], re.IGNORECASE):
+                continue
+        # Strict base title match for single-word searches
+        # Extract base title up to year or first dot
+        import re
+        base_title = item['title']
+        # Remove year and everything after
+        base_title = re.split(r'\.(19|20)\d{2}\.', base_title)[0]
+        # Or just take up to first dot if no year
+        base_title = base_title.split('.')[0]
+        base_title = base_title.replace('_', ' ').replace('-', ' ').strip().lower()
+        if search_text:
+            if len(search_text.split()) == 1:
+                # Single-word search: require exact match
+                if base_title == search_text.lower():
+                    filtered_results.append(item)
+                continue
+            else:
+                # Multi-word: fallback to previous fuzzy logic
+                import difflib
+                ratio = difflib.SequenceMatcher(None, base_title, search_text.lower()).ratio()
+                if ratio >= 0.85:
+                    filtered_results.append(item)
+                    continue
+                if f" {search_text.lower()} " in f" {base_title} ":
+                    filtered_results.append(item)
+                    continue
                 continue
         filtered_results.append(item)
     # Step 2: Show unique titles
@@ -82,6 +109,9 @@ def main():
             print("No search entered. Exiting.")
             break
         results = nzbgeek.search(search)
+        print("\n[DEBUG] Raw NZBGeek search results:")
+        for item in results:
+            print("  ", item['title'])
         selected = display_and_select(results)
         if selected and not sab.is_already_queued(selected):
             sab.add_nzb(selected)
