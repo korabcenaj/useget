@@ -1,0 +1,24 @@
+# Example config.yaml for useget
+nzbgeek:
+  api_key: "Em8eSff9ZJhu39YlnSjYvgk1mrEh6shS"
+  username: "lukiq"
+sabnzbd:
+  url: "http://192.168.1.209:8080"
+  api_key: "bf992e67ceec4e5caf90e80267a6ecc8"
+jellyfin:
+  url: "http://192.168.1.208:8096"
+  api_key: "8749830ecac34d0e91fe09f8e47d0c9a"
+filters:
+  quality: ["1080p", "720p"]
+  min_size_mb: 200
+  max_size_mb: 10000
+postprocess:
+  fix_permissions: true
+  target_uid: 1000
+  target_gid: 1000
+notify:
+  email: null
+  discord_webhook: null
+searches:
+  - "Solaris"
+interval: 3600
