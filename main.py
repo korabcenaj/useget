@@ -48,22 +48,10 @@ def main():
         again = input("Search for another title? (y/n): ").strip().lower()
         if again != 'y':
             break
-    def prompt_for_search():
-        return input("Enter the title of the movie/TV show to search for: ").strip()
 
-        while True:
-            search = prompt_for_search()
-            if not search:
-                print("No search entered. Exiting.")
-                break
-            results = nzbgeek.search(search)
-            selected = display_and_select(results)
-            if selected and not sab.is_already_queued(selected):
-                sab.add_nzb(selected)
-                notifier.notify(f"Added NZB: {selected['title']}")
-            again = input("Search for another title? (y/n): ").strip().lower()
-            if again != 'y':
-                break
+
+def prompt_for_search():
+    return input("Enter the title of the movie/TV show to search for: ").strip()
 
 if __name__ == "__main__":
     main()
