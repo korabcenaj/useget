@@ -7,18 +7,31 @@ from useget.filters.scene_parser import SceneNameParser
 from useget.filters.filter_engine import FilterEngine
 from useget.postprocess.post_processor import PostProcessor
 from useget.notify.notifier import Notifier
-import sys
-import time
-import argparse
 import os
+import logging
+import os
+import logging
+
 try:
     import readchar
 except ImportError:
     readchar = None
 
-def display_and_select(results, auto=False):
+logging.basicConfig(level=logging.INFO)
+
+from typing import List, Dict, Any, Optional
+
+def display_and_select(results: List[Dict[str, Any]], auto: bool = False) -> Optional[Dict[str, Any]]:
+    """
+    Display search results and allow user to select one interactively.
+    Args:
+        results: List of search result dicts.
+        auto: If True, auto-select the first result.
+    Returns:
+        The selected result dict, or None if no results.
+    """
     if not results:
-        print("No results found.")
+        print("No results found. Please refine your search criteria and try again.")
         return None
     letters = 'abcdefghijklmnopqrstuvwxyz'
     filtered_results = results
@@ -32,7 +45,7 @@ def display_and_select(results, auto=False):
         selected_title = unique_titles[0]
         links = [item for item in filtered_results if item['title'] == selected_title]
         return links[0]
-    print("\nSelect a result using arrow keys and press Enter:")
+    logging.info("\nSelect a result using arrow keys and press Enter:")
     idx = 0
     while True:
         os.system('cls' if os.name == 'nt' else 'clear')
@@ -51,7 +64,7 @@ def display_and_select(results, auto=False):
                 idx = letters.index(choice)
                 break
             else:
-                print("Invalid selection.")
+                print("Invalid selection. Please enter a valid number or letter.")
                 continue
         key = readchar.readkey()
         if key in (readchar.key.UP, 'k'):
@@ -82,7 +95,7 @@ def display_and_select(results, auto=False):
                 idx2 = letters.index(choice2)
                 break
             else:
-                print("Invalid selection.")
+                print("Invalid selection. Please enter a valid number or letter.")
                 continue
         key = readchar.readkey()
         if key in (readchar.key.UP, 'k'):
@@ -93,7 +106,26 @@ def display_and_select(results, auto=False):
             break
     return links[idx2]
 
-def cli_search(config, nzbgeek, sab, filter_engine, post_processor, notifier, args):
+def cli_search(
+    config: dict,
+    nzbgeek: Any,
+    sab: Any,
+    filter_engine: Any,
+    post_processor: Any,
+    notifier: Any,
+    args: Any
+) -> None:
+    """
+    Run CLI search workflow using provided config and clients.
+    Args:
+        config: Configuration dictionary.
+        nzbgeek: NZBGeekClient instance.
+        sab: SABnzbdClient instance.
+        filter_engine: FilterEngine instance.
+        post_processor: PostProcessor instance.
+        notifier: Notifier instance.
+        args: Parsed CLI arguments.
+    """
     for search in config['searches']:
         print(f"Searching for: {search}")
         results = nzbgeek.search(search)
@@ -119,29 +151,53 @@ def list_searches(config):
         print(f"- {s}")
 
 def main():
-    parser = argparse.ArgumentParser(description="useget CLI: Usenet automation tool")
-    parser.add_argument('--search', nargs='+', help='Override search terms (space separated)')
-    parser.add_argument('--auto', action='store_true', help='Run in non-interactive mode (auto-select first result)')
-    parser.add_argument('--list', action='store_true', help='List configured searches and exit')
-    parser.add_argument('--postprocess', action='store_true', help='Run post-processing after download')
-    parser.add_argument('--notify', action='store_true', help='Send notification after download')
-    parser.add_argument('--version', action='store_true', help='Show version and exit')
+    parser = argparse.ArgumentParser(description="useget CLI: NZB search, download, and automation tool.")
+    subparsers = parser.add_subparsers(dest="command", required=True, help="Subcommand to run")
+
+    # Search subcommand
+    search_parser = subparsers.add_parser("search", help="Search for NZBs")
+    search_parser.add_argument("query", nargs="*", help="Search query terms")
+    search_parser.add_argument("--auto", action="store_true", help="Auto-select first result")
+
+    # Download subcommand
+    download_parser = subparsers.add_parser("download", help="Download NZB by title")
+    download_parser.add_argument("title", help="Title of NZB to download")
+
+    # Monitor subcommand
+    monitor_parser = subparsers.add_parser("monitor", help="Monitor downloads and post-process")
+
+    # Version
+    parser.add_argument('--version', action='version', version='useget CLI version 0.1.0')
+
     args = parser.parse_args()
 
-    if args.version:
-        print("useget CLI version 0.1.0")
-        sys.exit(0)
-
     config = load_config()
-    if args.search:
-        config['searches'] = args.search
-    if args.list:
-        list_searches(config)
-        sys.exit(0)
     nzbgeek = NZBGeekClient(config['nzbgeek'])
     sab = SABnzbdClient(config['sabnzbd'])
-    scene_parser = SceneNameParser()
-    filter_engine = FilterEngine(config['filters'], scene_parser)
+    filter_engine = FilterEngine(config['filters'], SceneNameParser())
     post_processor = PostProcessor(config.get('postprocess', {}))
     notifier = Notifier(config.get('notify', {}))
-    cli_search(config, nzbgeek, sab, filter_engine, post_processor, notifier, args)
+
+    if args.command == "search":
+        query = " ".join(args.query) if args.query else None
+        if not query:
+            print("Please provide a search query.")
+            return
+        results = nzbgeek.search(query)
+        filtered = filter_engine.apply(results)
+        selected = display_and_select(filtered, auto=args.auto)
+        if selected:
+            print(f"Selected: {selected['title']}")
+    elif args.command == "download":
+        # Download by title
+        results = nzbgeek.search(args.title)
+        filtered = filter_engine.apply(results)
+        selected = display_and_select(filtered, auto=True)
+        if selected:
+            sab.add_nzb(selected)
+            print(f"Sent '{selected['title']}' to SABnzbd.")
+        else:
+            print("No matching NZB found.")
+    elif args.command == "monitor":
+        sab.monitor_downloads(post_processor, notifier)
+        print("Monitoring downloads...")

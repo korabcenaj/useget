@@ -3,9 +3,13 @@ filter_engine.py
 -----------------
 Filtering logic for search results, using scene parsing and quality selection.
 """
+
 from useget.filters.scene_parser import SceneNameParser
+import logging
 
 class FilterEngine:
+	def __init_logger(self):
+		self.logger = logging.getLogger(self.__class__.__name__)
 	"""
 	Filters search results based on quality and scene parsing.
 	Chooses the best result by highest quality.
@@ -15,6 +19,7 @@ class FilterEngine:
 		# scene_parser: instance of SceneNameParser
 		self.config = config
 		self.scene_parser = scene_parser
+		self.__init_logger()
 
 	def apply(self, results):
 		"""

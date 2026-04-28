@@ -3,11 +3,15 @@ sabnzbd_client.py
 -----------------
 Client for interacting with SABnzbd for NZB queueing and monitoring.
 """
+
 import requests
 import time
+import logging
 from useget.clients.test_sabnzbd_history import example_history
 
 class SABnzbdClient:
+	def __init_logger(self):
+		self.logger = logging.getLogger(self.__class__.__name__)
 	"""
 	Client for interacting with SABnzbd for NZB downloads and monitoring.
 	"""
@@ -16,13 +20,14 @@ class SABnzbdClient:
 		self.url = config['url']
 		self.api_key = config['api_key']
 		self.test_mode = config.get('test_mode', False)
+		self.__init_logger()
 
 	def add_nzb(self, nzb):
 		"""
 		Add an NZB to SABnzbd queue. In test mode, just print.
 		"""
 		if self.test_mode:
-			print(f"[TEST MODE] Would add NZB: {nzb['title']}")
+			self.logger.info(f"[TEST MODE] Would add NZB: {nzb['title']}")
 			return
 		files = {'nzbfile': requests.get(nzb['nzb_url']).content}
 		params = {
