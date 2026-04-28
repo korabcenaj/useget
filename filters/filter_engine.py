@@ -1,3 +1,5 @@
+from useget.filters.scene_parser import SceneNameParser
+
 class FilterEngine:
     def __init__(self, config, scene_parser):
         self.config = config

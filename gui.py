@@ -5,9 +5,9 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import QSettings
 
-from clients.nzbgeek_client import NZBGeekClient
-from clients.sabnzbd_client import SABnzbdClient
-from clients.jellyfin_client import JellyfinClient
+from useget.clients.nzbgeek_client import NZBGeekClient
+from useget.clients.sabnzbd_client import SABnzbdClient
+from useget.clients.jellyfin_client import JellyfinClient
 
 class SettingsDialog(QDialog):
     def __init__(self, parent=None, config=None):

@@ -1,5 +1,5 @@
 import unittest
-from filters.scene_parser import SceneNameParser
+from useget.filters.scene_parser import SceneNameParser
 
 class TestSceneNameParser(unittest.TestCase):
     def setUp(self):

@@ -1,6 +1,6 @@
 import unittest
-from filters.filter_engine import FilterEngine
-from filters.scene_parser import SceneNameParser
+from useget.filters.filter_engine import FilterEngine
+from useget.filters.scene_parser import SceneNameParser
 
 class TestTitleMatching(unittest.TestCase):
     def setUp(self):

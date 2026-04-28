@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "useget"
+version = "0.1.0"
+description = "Usenet automation and media downloader"
+authors = [
+    { name = "korab" }
+]
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = [
+    "requests",
+    "PyQt5",
+    "pyyaml",
+    "apscheduler"
+]

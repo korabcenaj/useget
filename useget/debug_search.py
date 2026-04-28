@@ -1,7 +1,7 @@
 from config.config_loader import load_config
-from useget.clients.nzbgeek_client import NZBGeekClient
-from useget.filters.scene_parser import SceneNameParser
-from useget.filters.filter_engine import FilterEngine
+from clients.nzbgeek_client import NZBGeekClient
+from filters.scene_parser import SceneNameParser
+from filters.filter_engine import FilterEngine
 
 def debug():
     config = load_config()
