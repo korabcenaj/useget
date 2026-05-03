@@ -29,7 +29,7 @@ A modular Python application for searching, downloading, and post-processing med
 
 - All source code and tests are inside the `useget/` package.
 - Configuration is handled via the GUI and stored persistently (no config files required).
-- Branch flow uses `main` for production, `dev` for integration, and `release/*` for release stabilization.
+- Branch flow uses `main` for production, `dev` for feature integration, `staging` for pre-release validation, and `release/*` for release stabilization.
 
 ## Testing
 

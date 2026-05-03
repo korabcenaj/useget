@@ -3,9 +3,9 @@ name: Python CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, dev, staging, 'release/**' ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, dev, staging, 'release/**' ]
 
 jobs:
   build:
@@ -26,4 +26,4 @@ jobs:
         flake8 .
     - name: Run tests
       run: |
-        python -m unittest discover -s tests
+        python -m unittest discover -s . -p 'test_*.py'
