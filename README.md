@@ -32,6 +32,7 @@ A modular Python application for searching, downloading, and post-processing med
 - Branch flow uses `main` for production, `dev` for feature integration, `staging` for pre-release validation, and `release/*` for release stabilization.
 - Tagged releases using the `v*` format build distributions and publish a GitHub release automatically.
 - Dependency updates for Python packages and GitHub Actions are checked weekly with Dependabot.
+- Maintainers should apply the documented branch protection policy in `.github/BRANCH_PROTECTION.md`.
 
 ## Testing
 
