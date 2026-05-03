@@ -46,3 +46,4 @@ python -m unittest discover -s useget -p 'test_*.py'
 - Follow PEP8 and best practices.
 - Use clear commit messages.
 - Add/modify tests for all features and bugfixes.
+- Review `CONTRIBUTING.md`, `SUPPORT.md`, `SECURITY.md`, and `CODE_OF_CONDUCT.md` before opening external contributions.

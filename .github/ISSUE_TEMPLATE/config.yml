@@ -3,3 +3,6 @@ contact_links:
   - name: Contribution Guidelines
     url: https://github.com/korabcenaj/useget/blob/main/CONTRIBUTING.md
     about: Review the repository workflow and contribution process before opening work.
+  - name: Support
+    url: https://github.com/korabcenaj/useget/blob/main/SUPPORT.md
+    about: Review support guidance before opening a new issue.
